@@ -1,0 +1,21 @@
+{
+  "name": "pentest",
+  "version": "1.0.0",
+  "description": "FH Salzburg pentest client",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "smoke": "node src/index.js",
+    "test:authz": "node src/tests/authz.js",
+    "test:idor": "node src/tests/idor-checks.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "axios-cookiejar-support": "^6.0.4",
+    "dotenv": "^16.5.0",
+    "tough-cookie": "^5.1.2"
+  }
+}
