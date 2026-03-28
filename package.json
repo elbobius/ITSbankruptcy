@@ -5,6 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "create-user": "node src/tests/create-user-and-transfer.js",
+    "login-last": "node src/tests/login-last-user.js",
     "smoke": "node src/index.js",
     "test:authz": "node src/tests/authz.js",
     "test:idor": "node src/tests/idor-checks.js"

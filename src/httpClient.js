@@ -38,9 +38,11 @@ client.interceptors.request.use((req) => {
 
 client.interceptors.response.use((res) => {
   console.log(`<-- ${res.status} ${res.config.url}`);
+
   if (res.data !== undefined) {
     console.log("RESPONSE:", JSON.stringify(res.data, null, 2));
   }
+
   return res;
 });
 

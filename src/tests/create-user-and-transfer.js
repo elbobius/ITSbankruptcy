@@ -1,5 +1,10 @@
 const authApi = require("../api/authApi");
 const transactionApi = require("../api/transactionApi");
+const { saveLastUser } = require("../userStore");
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function run() {
   const newUser = {
@@ -16,7 +21,7 @@ async function run() {
   };
 
   console.log("\n=== REGISTER ===");
-  const registerRes = await authApi.register(newUser);
+  const registerRes = await authApi.register(newUser, { timeout: 60000 });
   console.log("REGISTER STATUS:", registerRes.status);
   console.log("REGISTER RESPONSE:", JSON.stringify(registerRes.data, null, 2));
 
@@ -24,6 +29,20 @@ async function run() {
     console.log("Register fehlgeschlagen.");
     return;
   }
+
+  saveLastUser({
+    userName: newUser.userName,
+    password: newUser.password,
+    name: newUser.name,
+    surname: newUser.surname,
+    userRight: newUser.userRight,
+    createdAt: new Date().toISOString()
+  });
+
+  console.log("Letzter User gespeichert:", newUser.userName);
+
+  console.log("\n⏳ Warte 3 Sekunden...");
+  await sleep(3000);
 
   console.log("\n=== LOGIN ===");
   const loginRes = await authApi.login(newUser.userName, newUser.password);
@@ -45,8 +64,6 @@ async function run() {
     amount: 100,
     reference: "Pentest"
   };
-
-  console.log("TX PAYLOAD:", JSON.stringify(txPayload, null, 2));
 
   const txRes = await transactionApi.createTransaction(txPayload);
   console.log("TRANSACTION STATUS:", txRes.status);
