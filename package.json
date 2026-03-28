@@ -9,7 +9,9 @@
     "login-last": "node src/tests/login-last-user.js",
     "smoke": "node src/index.js",
     "test:authz": "node src/tests/authz.js",
-    "test:idor": "node src/tests/idor-checks.js"
+    "test:idor": "node src/tests/idor-checks.js",
+    "test:tx-authz": "node src/tests/transaction-authz-negative.js",
+    "test:race": "node src/tests/race-condition-check.js"
   },
   "keywords": [],
   "author": "",
