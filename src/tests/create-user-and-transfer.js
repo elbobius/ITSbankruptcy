@@ -1,10 +1,6 @@
 const authApi = require("../api/authApi");
 const transactionApi = require("../api/transactionApi");
-const { saveLastUser } = require("../userStore");
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const { retry, sleep } = require("../utils/retry");
 
 async function run() {
   const newUser = {
@@ -21,40 +17,21 @@ async function run() {
   };
 
   console.log("\n=== REGISTER ===");
-  const registerRes = await authApi.register(newUser, { timeout: 60000 });
-  console.log("REGISTER STATUS:", registerRes.status);
-  console.log("REGISTER RESPONSE:", JSON.stringify(registerRes.data, null, 2));
 
-  if (registerRes.status !== 200) {
-    console.log("Register fehlgeschlagen.");
-    return;
-  }
-
-  saveLastUser({
-    userName: newUser.userName,
-    password: newUser.password,
-    name: newUser.name,
-    surname: newUser.surname,
-    userRight: newUser.userRight,
-    createdAt: new Date().toISOString()
-  });
-
-  console.log("Letzter User gespeichert:", newUser.userName);
-
-  console.log("\n⏳ Warte 3 Sekunden...");
-  await sleep(3000);
+  await retry(
+    () => authApi.register(newUser),
+    "REGISTER"
+  );
 
   console.log("\n=== LOGIN ===");
-  const loginRes = await authApi.login(newUser.userName, newUser.password);
-  console.log("LOGIN STATUS:", loginRes.status);
-  console.log("LOGIN RESPONSE:", JSON.stringify(loginRes.data, null, 2));
 
-  if (loginRes.status !== 200) {
-    console.log("Login fehlgeschlagen.");
-    return;
-  }
+  await retry(
+    () => authApi.login(newUser.userName, newUser.password),
+    "LOGIN"
+  );
 
   console.log("\n=== CREATE TRANSACTION ===");
+
   const txPayload = {
     id: 0,
     senderId: newUser.userName,
@@ -65,15 +42,18 @@ async function run() {
     reference: "Pentest"
   };
 
-  const txRes = await transactionApi.createTransaction(txPayload);
-  console.log("TRANSACTION STATUS:", txRes.status);
-  console.log("TRANSACTION RESPONSE:", JSON.stringify(txRes.data, null, 2));
+  await retry(
+    () => transactionApi.createTransaction(txPayload),
+    "TRANSACTION"
+  );
+
+  console.log("\n🎉 FLOW ERFOLGREICH DURCHGELAUFEN");
 }
 
 module.exports = run;
 
 if (require.main === module) {
-  run().catch((err) => {
-    console.error("ERROR:", err.message);
+  run().catch(err => {
+    console.error("FATAL:", err.message);
   });
 }
